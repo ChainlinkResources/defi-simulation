@@ -1,0 +1,46 @@
+namespace: /defi
+
+ganache-cli:
+    defines: runnable
+    inherits: /trufflesuite/ganache-cli/latest
+    variables:
+        ethereum-http: https://mainnet.infura.io/v3/a2bdcdbe203942249f08666b4f225680
+
+chainlink-db:
+    defines: runnable
+    inherits: postgres/12-alpine
+
+chainlink-1:
+    defines: runnable
+    inherits: /chainlink/latest
+    variables:
+        db-host: <- get-hostname("defi/chainlink-db", "postgres")
+        ethereum-ws: <- "ws://" get-hostname("defi/ganache-cli", "ganache-cli") ":8545" concat-all
+        eth-chain-id: 1337
+
+interface-1:
+    defines: runnable
+    inherits: /interface/latest
+    variables:
+        ganache-host: <- get-hostname("defi/ganache-cli", "ganache-cli")
+
+price-source-1:
+    defines: runnable
+    inherits: /defi/dummy-price-reporter
+
+price-feed-1:
+    defines: runnable
+    inherits: /defi/open-price-feed-poster
+    variables:
+        ganache-host: <- get-hostname("defi/ganache-cli", "ganache-cli")
+        reporter-host: <- get-hostname("defi/price-source-1", "reporter")
+
+stack:
+    defines: process-group
+    runnable-list:
+        - /defi/ganache-cli
+        - /defi/chainlink-db
+        - /defi/chainlink-1
+        - /defi/interface-1
+        - /defi/price-source-1
+        - /defi/price-feed-1

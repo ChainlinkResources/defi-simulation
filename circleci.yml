@@ -1,0 +1,21 @@
+version: 2.1
+jobs:
+  deploy:
+    docker:
+      - image: gcr.io/moncc-public-gcr/moncc-ci:latest
+    steps: 
+      - checkout
+      - run:
+          command: |
+            echo "Test to see if we arrive that stage"
+            MNCC="mncc -s /var/run/monccd.sock --nofancy --nocolor"
+            sleep 10
+            $MNCC login --email <your-email> --password <your-password>
+            $MNCC cluster switch -m <cluster-monccode>
+            sleep 60
+            $MNCC load <your-template-file.yaml>
+            $MNCC update your-template/runnable
+workflows:
+  build:
+    jobs:
+      - deploy

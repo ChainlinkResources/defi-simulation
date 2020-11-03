@@ -1,0 +1,33 @@
+namespace: /chainlink
+
+chainlink-db:
+  defines: runnable
+  inherits: postgres/12-alpine
+
+chainlink-1:
+  defines: runnable
+  inherits: ./common
+  variables:
+    db-host: <- get-hostname("chainlink/chainlink-db", "postgres")
+    
+chainlink-2:
+  defines: runnable
+  inherits: ./common
+  variables:
+    db-host: <- get-hostname("chainlink/chainlink-db", "postgres")
+    rpc-port: 6689
+
+system:
+  defines: process-group
+  balancers:
+    defines: balancers
+    app-balancer:
+      port: 8545
+      type: http
+      instances:
+        - /chainlink/chainlink-1
+        - /chainlink/chainlink-2
+  runnable-list:
+    - /chainlink/chainlink-db
+    - /chainlink/chainlink-1
+    - /chainlink/chainlink-2

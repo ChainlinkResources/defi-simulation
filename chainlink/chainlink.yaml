@@ -1,0 +1,84 @@
+namespace: /chainlink
+common:
+  metadata:
+    defines: metadata
+    name: Chainlink
+    description: Your smart contracts connected to real world data events and payments.
+    tags: blockchain
+    currency: LINK
+    website: https://chain.link
+    source: https://github.com/smartcontractkit/chainlink
+    publisher: "Moncc.io"
+  containers:
+    defines: containers
+    chainlink-node:
+      image: smartcontract/chainlink
+      image-tag: latest
+      entrypoint: <- `${entrypoint}`
+      ports:
+        - <- `${host}:${rpc-port}:6688`
+      paths:
+        - <- `${moncc-volume-path}/chainlink:/chainlink`
+      environment:
+        # https://docs.chain.link/docs/configuration-variables#config
+        - NOTIFICATION_EMAIL=maciej@moncc.io
+        - ROOT=/chainlink
+        - LOG_LEVEL=debug
+        - MIN_OUTGOING_CONFIRMATIONS=2
+        - LINK_CONTRACT_ADDRESS=0x20fe562d797a42dcb3399062ae9546cd06f63280
+        - CHAINLINK_TLS_PORT=0
+        - CHAINLINK_TLS_HOST=localhost
+        - SECURE_COOKIES=false
+        - ALLOW_ORIGINS=*        
+        - DATABASE_TIMEOUT=0
+        - <- `ETH_CHAIN_ID=${eth-chain-id}`
+        - <- `ETH_URL=${ethereum-ws}`
+        - <- `DATABASE_URL=${database-url}`
+  variables:
+    defines: variables
+    eth-chain-id:
+      type: int
+      value: 1
+    network:
+      type: string
+      value: mainnet
+    ethereum-ws:
+      type: string
+      value: ""
+    rpc-port:
+      type: int
+      value: 6688
+    host:
+      type: string
+      value: "0.0.0.0"
+    db-host:
+      type: string
+      value: "0.0.0.0"
+    database-url:
+      type: string
+      value: <- `postgresql://postgres:password@${db-host}:5432/postgres?sslmode=disable`
+    entrypoint:
+      type: string
+      value: <- `chainlink local n -p /.secret -a /.api`
+  actions:
+    defines: actions
+    health:
+      description: Check health
+      arguments: {}
+      code: exec("chainlink-node", "/bin/bash", "-c", `health_http_code=$(curl --write-out "%{http_code}" --silent --output /dev/null http://localhost:6688/); if [[ "$health_http_code" -ne 200 ]] ; then echo "false"; else echo "true"; fi`)
+  files:
+    defines: files
+    api-file:
+      container: chainlink-node
+      path: /.api
+      contents: |
+        maciej@moncc.io
+        password
+    secret-file:
+      container: chainlink-node
+      path: /.secret
+      contents: wallet_password
+
+latest:
+  defines: runnable
+  inherits: ./common

@@ -1,0 +1,33 @@
+namespace: /trufflesuite/ganache-cli
+
+common:
+    defines: runnable
+    containers:
+        defines: containers
+        ganache-cli:
+            image: trufflesuite/ganache-cli
+            image-tag: latest
+            entrypoint: <- `node /app/ganache-core.docker.cli.js --verbose --fork ${ethereum-http} -i ${network-id} --account "0x31c354f57fc542eba2c56699286723e94f7bd02a4891a0a7f68566c2a2df6795,100000000000000000000" --unlock ${unlock-compound-opf}`
+            ports:
+              - <- `0.0.0.0:${ganache-port}:8545`
+    variables:
+        defines: variables
+        ganache-port:
+            type: int
+            value: 8545
+        network-id:
+            type: string
+            value: 998
+        ethereum-http:
+            type: string
+            value: ""
+        user-account-1:
+            type: string
+            value: "0x31c354f57fc542eba2c56699286723e94f7bd02a4891a0a7f68566c2a2df6795"
+        unlock-compound-opf: # open price feed
+            type: string
+            value: "0x922018674c12a7f0d394ebeef9b58f186cde13c1"
+
+latest:
+    defines: runnable
+    inherits: ./common

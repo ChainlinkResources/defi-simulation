@@ -1,0 +1,35 @@
+namespace: /defi
+
+open-price-feed-poster:
+    defines: runnable
+    containers:
+        defines: containers
+        poster: 
+            image: registry.gitlab.com/maciej22/ethereum-fork/poster
+            image-tag: master
+            bash: <- `cp /root/post.sh . && /bin/sh /root/r.sh`
+    variables:
+        defines: variables
+        ganache-host:
+            type: string
+            value:  "" #<- get-hostname("defi/ganache-cli", "ganache-cli")
+        reporter-host:
+            type: string
+            value:  "" #<- get-hostname("defi/reporter-1", "reporter")
+    actions:
+        defines: actions
+        post-prices:
+            description: Post prices from reporter to Open Price Feed contract
+            code: exec("poster", "/bin/sh", "-c", `./post.sh`)
+    files:
+        defines: files
+        r1:
+            path: /root/r.sh
+            container: poster
+            contents: "while true; do sleep 5; date; done"
+        post-script:
+            path: /root/post.sh
+            container: poster
+            mode: 0777
+            contents: |
+                yarn run start --web3-provider=http://{{ v "ganache-host" }}:8545 --poster-key=0x31c354f57fc542eba2c56699286723e94f7bd02a4891a0a7f68566c2a2df6795 --view-address=0x922018674c12a7f0d394ebeef9b58f186cde13c1 --sources=http://{{ v "reporter-host" }}:4040/prices.json --price-deltas='{"BTC":10000, "ETH": 1100, "DAI": 1, "REP": 11, "ZRX":11, "BAT": 90, "KNC":50, "LINK": 14, "COMP": 90}'

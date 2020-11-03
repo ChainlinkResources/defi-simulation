@@ -1,0 +1,34 @@
+{
+  "name": "open-oracle-poster",
+  "version": "1.1.2",
+  "description": "A Customizable Poster for the Compound Open Price Feed",
+  "main": ".tsbuilt/poster.js",
+  "bin": ".tsbuilt/index.js",
+  "repository": "https://compound.finance/open-oracle",
+  "author": "Compound Labs, Inc.",
+  "license": "MIT",
+  "scripts": {
+    "prepare": "npx tsc",
+    "start": "node .tsbuilt/index.js",
+    "test": "npx jest"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "@types/node": "^12.12.14",
+    "jest": "^24.9.0",
+    "jest-junit": "^10.0.0",
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.7.3"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.0",
+    "ganache-core": "github:compound-finance/ganache-core.git#compound",
+    "node-fetch": "^2.6.0",
+    "web3": "1.2.9",
+    "yargs": "^15.0.2"
+  },
+  "resolutions": {
+    "scrypt.js": "https://registry.npmjs.org/@compound-finance/ethereumjs-wallet/-/ethereumjs-wallet-0.6.3.tgz",
+    "**/sha3": "^2.1.2"
+  }
+}

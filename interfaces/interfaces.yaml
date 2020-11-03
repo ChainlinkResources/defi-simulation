@@ -1,0 +1,42 @@
+namespace: /interface
+
+common:
+    containers:
+        defines: containers
+        interface:
+            image: registry.gitlab.com/maciej22/ethereum-fork/interface
+            image-tag: master
+            bash: sleep 20 && truffle compile && truffle test && truffle migrate && mkdir -p client/src/contracts && cp -R build/contracts/* client/src/contracts && cd client && npm start
+            ports:
+                - <- `0.0.0.0:${drizzle-port}:3000`
+    variables:
+        defines: variables
+        drizzle-port:
+            type: int
+            value: 3000
+        ganache-host:
+            type: string
+            value:  localhost
+        ganache-port:
+            type: int
+            value: 8545
+    files:
+        defines: files
+        truffle-config:
+            container: interface
+            path: /truffle-config.js
+            mode: 0777
+            contents: |
+                module.exports = {
+                    networks: {
+                    development: {
+                        host: '{{ v "ganache-host" }}',
+                        port: {{ v "ganache-port" }},
+                        network_id: '*',
+                        },
+                    },
+                }
+            
+latest:
+    defines: runnable
+    inherits: ./common

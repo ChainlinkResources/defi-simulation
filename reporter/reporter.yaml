@@ -1,0 +1,20 @@
+namespace: /defi
+
+dummy-price-reporter:
+    defines: runnable
+    containers:
+        defines: containers
+        reporter: 
+            image: registry.gitlab.com/maciej22/ethereum-fork/reporter
+            image-tag: master
+            entrypoint: yarn run start --private_key 0x31c354f57fc542eba2c56699286723e94f7bd02a4891a0a7f68566c2a2df6795 --script examples/fixed.js
+            ports:
+                - <- `0.0.0.0:${rpc-port}:4040`
+    variables:
+        defines: variables
+        rpc-port:
+            type: int
+            value: 4040
+        user-private-key:
+            type: string
+            value: "0x31c354f57fc542eba2c56699286723e94f7bd02a4891a0a7f68566c2a2df6795"

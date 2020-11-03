@@ -1,0 +1,30 @@
+{
+  "name": "open-oracle-reporter",
+  "version": "1.0.2",
+  "description": "The Open Oracle Reporter",
+  "main": ".tsbuilt/index.js",
+  "types": ".tsbuilt/index.js",
+  "repository": "https://github.com/compound-finance/open-oracle",
+  "author": "Compound Labs, Inc.",
+  "license": "MIT",
+  "scripts": {
+    "start": "npx tsc --skipLibCheck && node ./.tsbuilt/cli.js",
+    "prepare": "npx tsc --skipLibCheck",
+    "test": "jest"
+  },
+  "dependencies": {
+    "web3": "^1.2.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "jest": "^24.9.0",
+    "jest-junit": "^10.0.0",
+    "node-fetch": "^2.6.0",
+    "ts-jest": "^24.2.0",
+    "typescript": "^3.7.3"
+  },
+  "optionalDependencies": {
+    "@types/express": "^4.17.2",
+    "express": "^4.17.1"
+  }
+}

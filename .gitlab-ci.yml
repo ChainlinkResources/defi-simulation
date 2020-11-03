@@ -1,0 +1,77 @@
+stages:
+    - test
+    - build
+    - deploy
+
+test_interfaces:
+    stage: test
+    image: node:10
+    when: manual
+    services:
+        - trufflesuite/ganache-cli
+    script:
+        - cd interfaces/client && npm ci
+        - npm install truffle
+        - ./node_modules/truffle/build/cli.bundled.js compile
+        - ./node_modules/truffle/build/cli.bundled.js migrate --network gitlab
+        - ./node_modules/truffle/build/cli.bundled.js test --network gitlab
+
+build_interfaces:
+    stage: build
+    image: docker:19.03.12
+    when: manual
+    services:
+        - docker:19.03.12-dind
+    variables:
+        IMAGE_TAG: $CI_REGISTRY_IMAGE/interface:$CI_COMMIT_REF_SLUG
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker build -t $IMAGE_TAG interfaces/
+        - docker push $IMAGE_TAG
+
+build_reporter:
+    stage: build
+    image: docker:19.03.12
+    when: manual
+    services:
+        - docker:19.03.12-dind
+    variables:
+        IMAGE_TAG: $CI_REGISTRY_IMAGE/reporter:$CI_COMMIT_REF_SLUG
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker build -t $IMAGE_TAG reporter/
+        - docker push $IMAGE_TAG
+
+build_poster:
+    stage: build
+    image: docker:19.03.12
+    when: manual
+    services:
+        - docker:19.03.12-dind
+    variables:
+        IMAGE_TAG: $CI_REGISTRY_IMAGE/poster:$CI_COMMIT_REF_SLUG
+    script:
+        - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+        - docker build -t $IMAGE_TAG poster/
+        - docker push $IMAGE_TAG
+
+deploy_mncc:
+    stage: deploy
+    when: manual
+    image: 
+        name: "gcr.io/moncc-public-gcr/moncc-ci:latest"
+        entrypoint: [""]
+    before_script:
+        - |
+            /usr/local/bin/monccd --cluster-only --hypervised -s /var/run/monccd.sock &
+    script:
+        - |
+            set -x
+            sleep 10
+            echo $CI_MONCC_USERNAME
+            echo $CI_CLUSTER_MONCCODE
+            MNCC="/usr/local/bin/mncc -s /var/run/monccd.sock"
+            $MNCC login --email $CI_MONCC_USERNAME --password $CI_MONCC_PASSWORD
+            $MNCC cluster switch -m $CI_CLUSTER_MONCCODE
+            $MNCC load stack.yaml
+            $MNCC update defi/stack
