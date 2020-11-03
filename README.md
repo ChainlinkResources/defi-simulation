@@ -2,6 +2,7 @@
 
 - purpose: to abstract the complexity of scaling/growing infrastructure and serve as unified environment for testing and simulation of new products/strategies on DeFi.
 - self-contained, portable, fully configurable and expandable system based on Moncc configuration and orchestration.
+- deploy to local, dev or production in less than 1 hour.
 
 - 🧪 WIP - automatic Chainlink oracle feeds and adapters components as well as MakerDAO V2, Uniswap V2, dYdX, Compound oracle systems.
 - 🧪 WIP - automatic user / LP wallet behaviours components.
